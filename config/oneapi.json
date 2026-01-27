@@ -1,0 +1,710 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Tiến Lên Miền Nam",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/"
+    },
+    {
+      "url": "https://localhost:8000/"
+    }
+  ],
+  "paths": {
+    "/api/currentUser": {
+      "get": {
+        "tags": ["api"],
+        "description": "Lấy người dùng hiện tại",
+        "operationId": "currentUser",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-swagger-router-controller": "api"
+    },
+    "/api/login/captcha": {
+      "post": {
+        "description": "Gửi mã xác minh",
+        "operationId": "getFakeCaptcha",
+        "tags": ["login"],
+        "parameters": [
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "Số điện thoại",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FakeCaptcha"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/outLogin": {
+      "post": {
+        "description": "Giao diện đăng xuất",
+        "operationId": "outLogin",
+        "tags": ["login"],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-swagger-router-controller": "api"
+    },
+    "/api/login/account": {
+      "post": {
+        "tags": ["login"],
+        "description": "Giao diện đăng nhập",
+        "operationId": "login",
+        "requestBody": {
+          "description": "Đăng nhập hệ thống",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "body"
+      },
+      "x-swagger-router-controller": "api"
+    },
+    "/api/notices": {
+      "summary": "getNotices",
+      "description": "NoticeIconItem",
+      "get": {
+        "tags": ["api"],
+        "operationId": "getNotices",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeIconList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-swagger-router-controller": "api"
+    },
+    "/api/rule": {
+      "get": {
+        "tags": ["api"],
+        "description": "Lấy danh sách quy tắc",
+        "operationId": "rule",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "description": "Số trang hiện tại",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Kích thước trang",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Tên quy tắc",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "description": "Mô tả quy tắc",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "description": "Khóa quy tắc",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Trạng thái quy tắc",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "createdAt",
+            "in": "query",
+            "description": "Ngày tạo",
+            "schema": {
+              "type": "string",
+              "format": "datetime"
+            }
+          },
+          {
+            "name": "updatedAt",
+            "in": "query",
+            "description": "Ngày cập nhật",
+            "schema": {
+              "type": "string",
+              "format": "datetime"
+            }
+          },
+          {
+            "name": "progress",
+            "in": "query",
+            "description": "Tiến độ",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["api"],
+        "description": "Cập nhật quy tắc",
+        "operationId": "updateRule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleListItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleListItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "body"
+      },
+      "post": {
+        "tags": ["api"],
+        "description": "Thêm quy tắc",
+        "operationId": "addRule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleListItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleListItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "body"
+      },
+      "delete": {
+        "tags": ["api"],
+        "description": "Xóa quy tắc",
+        "operationId": "removeRule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Lỗi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "body"
+      },
+      "x-swagger-router-controller": "api"
+    }
+  },
+  "components": {
+    "schemas": {
+      "LoginResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Trạng thái đăng nhập"
+          },
+          "type": {
+            "type": "string",
+            "description": "Loại đăng nhập"
+          },
+          "currentAuthority": {
+            "type": "string",
+            "description": "Quyền hiện tại"
+          }
+        }
+      },
+      "CurrentUser": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tên người dùng"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "Ảnh đại diện"
+          },
+          "userid": {
+            "type": "string",
+            "description": "ID người dùng"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email"
+          },
+          "signature": {
+            "type": "string",
+            "description": "Chữ ký"
+          },
+          "title": {
+            "type": "string",
+            "description": "Tiêu đề"
+          },
+          "group": {
+            "type": "string",
+            "description": "Nhóm"
+          },
+          "tags": {
+            "type": "array",
+            "description": "Thẻ",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "notifyCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Số lượng thông báo"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Số lượng chưa đọc"
+          },
+          "country": {
+            "type": "string",
+            "description": "Quốc gia"
+          },
+          "access": {
+            "type": "string",
+            "description": "Quyền truy cập"
+          },
+          "geographic": {
+            "type": "object",
+            "description": "Vị trí địa lý",
+            "properties": {
+              "province": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  }
+                }
+              },
+              "city": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "address": {
+            "type": "string",
+            "description": "Địa chỉ"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Số điện thoại"
+          }
+        }
+      },
+      "RuleListItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "href": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "callNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "progress": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RuleList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleListItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Tổng số nội dung danh sách",
+            "format": "int32"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FakeCaptcha": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginParams": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "autoLogin": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "required": ["errorCode"],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "description": "Mã lỗi theo thỏa thuận kinh doanh"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "Thông tin lỗi kinh doanh"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Yêu cầu kinh doanh có thành công không"
+          }
+        }
+      },
+      "NoticeIconList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoticeIconItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Tổng số nội dung danh sách",
+            "format": "int32"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NoticeIconItemType": {
+        "title": "NoticeIconItemType",
+        "description": "Enum cho danh sách đã đọc/chưa đọc",
+        "type": "string",
+        "properties": {},
+        "enum": ["notification", "message", "event"]
+      },
+      "NoticeIconItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "extra": {
+            "type": "string",
+            "format": "any"
+          },
+          "key": { "type": "string" },
+          "read": {
+            "type": "boolean"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "datetime": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "extensions": {
+              "x-is-enum": true
+            },
+            "$ref": "#/components/schemas/NoticeIconItemType"
+          }
+        }
+      }
+    }
+  }
+}
