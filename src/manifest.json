@@ -1,6 +1,6 @@
 {
-  "name": "Tiến Lên Miền Nam",
-  "short_name": "Tiến Lên Miền Nam",
+  "name": "Tập Thể Dục Tại Nhà",
+  "short_name": "Tập Thể Dục Tại Nhà",
   "display": "standalone",
   "start_url": "./?utm_source=homescreen",
   "theme_color": "#002140",

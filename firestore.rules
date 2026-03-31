@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own account document
+    match /TaiKhoanQuanTri/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow admins to read all account documents
+      allow read: if request.auth != null && get(/databases/$(database)/documents/TaiKhoanQuanTri/$(request.auth.uid)).data.VaiTro == 'Admin';
+    }
+
+    // Add rules for other collections as needed
+    // For example, if other collections should be accessible to authenticated users:
+    // match /{document=**} {
+    //   allow read, write: if request.auth != null;
+    // }
+  }
+}

@@ -15,7 +15,7 @@ const Settings: ProLayoutProps & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Tiến Lên Miền Nam',
+  title: 'GymHome Admin',
   pwa: true,
   logo: '/image.svg',
   iconfontUrl: '',

@@ -11,12 +11,12 @@ const Footer: React.FC = () => {
       style={{
         background: 'none',
       }}
-      copyright="Được cung cấp bởi nhà phát triển Tiến Lên Miền Nam"
+      copyright="Được cung cấp bởi nhà phát triển GymHome"
       links={[
         {
-          key: 'Tiến Lên Miền Nam',
-          title: 'Website nhóm phát triển Tiến Lên Miền Nam',
-          href: 'https://github.com/Tuanngoc21/tienLenmn',
+          key: 'GYMHOME - Tập luyện sức khỏe tại nhà',
+          title: 'Website nhóm phát triển GymHome',
+          href: 'https://github.com/ongthanhvlog/webadmin_gymhome',
           blankTarget: true,
         },
         // {

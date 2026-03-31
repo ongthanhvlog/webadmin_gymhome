@@ -83,7 +83,7 @@ export default defineConfig({
    * @name Plugin layout
    * @doc https://umijs.org/docs/max/layout-menu
    */
-  title: 'Tiến Lên Miền Nam',
+  title: 'Tập Thể Dục Tại Nhà',
   layout: {
     locale: true,
     ...defaultSettings,

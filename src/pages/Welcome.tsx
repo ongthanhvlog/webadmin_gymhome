@@ -66,7 +66,7 @@ const InfoCard: React.FC<{
 };
 
 /**
- * Trang chào mừng của hệ thống quản trị game đánh bài online
+ * Trang chào mừng của hệ thống quản trị 
  */
 const Welcome: React.FC = () => {
   const { token } = theme.useToken();
@@ -101,7 +101,7 @@ const Welcome: React.FC = () => {
               fontWeight: 600,
             }}
           >
-            Chào mừng đến với Hệ thống Quản trị Game Đánh Bài Online
+            Chào mừng đến với Hệ thống Quản trị Ứng Dụng GymHome - Hỗ trợ tập thể dục và rèn luyện sức khỏe
           </div>
           <p
             style={{
@@ -114,10 +114,8 @@ const Welcome: React.FC = () => {
               textAlign: 'justify',
             }}
           >
-            Đây là trang quản trị được phát triển nhằm hỗ trợ đội ngũ vận hành 
-            quản lý toàn bộ hệ thống game đánh bài trực tuyến. 
-            Trang web cung cấp các công cụ theo dõi người chơi, quản lý sự kiện, 
-            xử lý giao dịch, chăm sóc khách hàng và quản trị tài khoản một cách hiệu quả.
+            Đây là trang quản trị được phát triển nhằm hỗ trợ vận hành 
+            quản lý toàn bộ hệ thống ứng dụng hỗ trỡ tập thể dục. 
           </p>
 
           <div
@@ -129,17 +127,17 @@ const Welcome: React.FC = () => {
           >
             <InfoCard
               index={1}
-              title="Quản lý người chơi"
+              title="Quản lý người dùng"
               desc="Xem, tìm kiếm và quản lý thông tin người chơi trong hệ thống, bao gồm trạng thái tài khoản, lịch sử đăng nhập và hoạt động trong game."
             />
             <InfoCard
               index={2}
-              title="Quản lý nội dung"
+              title="Quản lý vùng tập chung"
               desc="Tạo và chỉnh sửa các sự kiện trong game, quản lý hệ thống giftcode, giúp duy trì và phát triển nội dung trò chơi."
             />
             <InfoCard
               index={3}
-              title="Quản lý tài chính"
+              title="Quản lý kế hoạch"
               desc="Theo dõi lịch sử nạp rút, doanh thu và các giao dịch trong hệ thống nhằm đảm bảo tính minh bạch và an toàn tài chính."
             />
             <InfoCard

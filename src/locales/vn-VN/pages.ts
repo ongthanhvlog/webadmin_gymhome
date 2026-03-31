@@ -1,6 +1,6 @@
 export default {
   'pages.layouts.userLayout.title':
-    'Tiến lên miền miền Nam - Game đánh bài đổi thưởng hấp dẫn nhất Việt Nam',
+    'Ứng dụng hỗ trợ tập thể dục và rèn luyện sức khỏe',
   'pages.login.accountLogin.tab': 'Đăng nhập bằng tài khoản',
   'pages.login.accountLogin.errorMessage':
     'Tên người dùng/mật khẩu không đúng (admin/ant.design)',
