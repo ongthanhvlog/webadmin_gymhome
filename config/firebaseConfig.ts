@@ -1,17 +1,19 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage'; 
 
-// const firebaseConfig = {
-//   apiKey: "AIzaSyBv4-TVV4K2RotzRGjMH8sIl5fAwYSRAIw",
-//   authDomain: "tienlenmiennam-d2c29.firebaseapp.com",
-//   projectId: "tienlenmiennam-d2c29",
-//   storageBucket: "tienlenmiennam-d2c29.appspot.com",
-//   messagingSenderId: "655535492821",
-//   appId: "1:655535492821:web:e408ed52f563bb4f891c5c", // 🔥 web appId, KHÔNG dùng appId Android
-// };
+const firebaseConfig = {
+  apiKey: "AIzaSyC_zEFn_LZ9N8LqtT2JDGsxwpj_VqPwako",
+  authDomain: "gymhome-4953.firebaseapp.com",
+  projectId: "gymhome-4953",
+  storageBucket: "gymhome-4953.firebasestorage.app", 
+  messagingSenderId: "1042557616594",
+  appId: "1:1042557616594:web:046069d57d12d77801c80b",
+};
 
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app); 

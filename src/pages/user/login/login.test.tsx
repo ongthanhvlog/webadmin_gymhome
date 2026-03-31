@@ -48,7 +48,7 @@ describe('Login Page (Firebase)', () => {
     expect(
       rootContainer.baseElement?.querySelector('.ant-pro-form-login-title')
         ?.textContent,
-    ).toBe('Tiến lên miền miền Nam');
+    ).toBe('GymHome');
 
     rootContainer.unmount();
   });

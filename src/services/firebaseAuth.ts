@@ -10,7 +10,7 @@ export async function loginWithFirebase({ username, password }: { username: stri
     const cred = await signInWithEmailAndPassword(auth, email, password);
 
     // lấy document role từ Firestore (theo email hoặc uid)
-    const q = query(collection(db, 'DanhSachTaiKhoan'), where('email', '==', cred.user.email));
+    const q = query(collection(db, 'TaiKhoanQuanTri'), where('email', '==', cred.user.email));
     const snap = await getDocs(q);
     const doc = snap.docs[0]?.data() ?? null;
 

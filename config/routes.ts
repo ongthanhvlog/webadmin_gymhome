@@ -1,4 +1,7 @@
-﻿/**
+﻿import component from "@/locales/vn-VN/component";
+import path from "path";
+
+/**
  * @name Cấu hình tuyến đường umi
  * @description Chỉ hỗ trợ cấu hình path, component, routes, redirect, wrappers, name, icon
  * @param path  path chỉ hỗ trợ hai loại placeholder, loại đầu là tham số động :id, loại thứ hai là * wildcard, wildcard chỉ có thể xuất hiện ở cuối chuỗi tuyến đường.
@@ -26,48 +29,56 @@ export default [
     path: '/welcome',
     name: 'welcome',
     icon: 'smile',
-    access: 'canUser',
     component: './Welcome',
   },
   //Tong quan bao cao
   {
-    path: '/reports',
+    path: '/TongQuan',
     name: 'Tổng quan',
     icon: 'BarChartOutlined',
-    //component: './Reports',
+    component: './TongQuan/index',
+  },
+  //cấu hình route trang người dùng
+  {
+    path: '/NguoiDung',
+    name: 'Quản lý người dùng',
+    icon: 'TeamOutlined',
+    component: './NguoiDung/index',
+  },
+  // cấu hình route trang vùng tập trung
+  {
+    path: '/VungTapTrung',
+    name: 'Quản lý vùng tập trung',
+    icon: 'AppstoreOutlined',
+    component: './VungTapTrung/index',
+  },
+  // // cấu hình route trang quản lý kế hoạch
+ 
+  {
+    path: '/KeHoach',
+    name: 'Quản lý kế hoạch',
+    icon: 'ScheduleOutlined',
     routes: [
       {
-        path: '/reports',
-        name: 'Báo cáo chung',
-        icon: 'DashboardOutlined',
-        access: 'canUser',
-        component: './Reports',
+        path: '/KeHoach/NguoiMoiBatDau',
+        name: 'Người mới bắt đầu',
+        component: './KeHoach/index',
       },
       {
-        path: '/reports/player',
-        name: 'Báo cáo người dùng',
-        icon: 'UserOutlined',
-        access: 'canUser',
-        component: './Reports/PlayerReport',
+        path: '/KeHoach/NangCao',
+        name: 'Nâng cao',
+        component: './KeHoach/index',
       },
-      {
-        path: '/reports/revenue',
-        name: 'Doanh thu hàng tháng',
-        icon: 'FundOutlined',
-        access: 'canUser',
-        component: './Reports/MonthlyRevenue',
-      },
-
-      // {
-      //   path: '/reports/transactions',
-      //   name: 'Số giao dịch trong ngày',F
-      //   icon: 'LineChartOutlined',
-      //   component: './Reports/DailyActiveUsers',
-      // },
     ],
   },
-
+  //cấu hình route trang support
   {
+    name: 'Chăm sóc khách hàng',
+    icon: 'CustomerServiceOutlined',
+    path: '/ChamSocKhachHang',
+    component: './ChamSocKhachHang/index',
+  },
+    {
     path: '/',
     redirect: '/welcome',
   },
@@ -75,66 +86,5 @@ export default [
     component: '404',
     layout: false,
     path: './*',
-  },
-  // Mạnh: cấu hình route trang player
-  {
-    name: 'Quản lý người chơi',
-    icon: 'TeamOutlined',
-    path: '/Player',
-    access: 'canUser',
-    component: './Player/index',
-  },
-  // Thành: cấu hình route trang content
-  {
-    path: '/Content',
-    name: 'Quản lý nội dung',
-    icon: 'AppstoreOutlined',
-    routes: [
-      {
-        path: '/Content/Event',
-        name: 'Event Sự kiện',
-        access: 'canUser',
-        component: './Content/Event/index',
-      },
-      {
-        path: '/Content/Giftcode',
-        name: 'Mã quà tặng Giftcode',
-        access: 'canUser',
-        component: './Content/Giftcode/index',
-      },
-    ],
-  },
-  // Thành: cấu hình route trang support
-  {
-    name: 'Chăm sóc khách hàng',
-    icon: 'CustomerServiceOutlined',
-    path: '/Support',
-    access: 'canUser',
-    component: './Support/index',
-  },
-
-  // Thanh: cấu hình route trang mange-accounts
-  {
-    name: 'Quản lý tài khoản',
-    icon: 'crown',
-    path: '/mange-accounts',
-    access: 'canAdmin',
-    component: './mange-accounts/index',
-  },
-  // quan li tai chinh
-  {
-    path: '/finance',
-    name: 'Giao dịch',
-    icon: 'DollarOutlined',
-    access: 'canUser',
-    component: './Finance',
-  },
-
-  {
-    name: 'Thông tin cá nhân',
-    icon: 'user',
-    access: 'canUser',
-    path: '/personal-information',
-    component: './personal-information/index',
   },
 ];

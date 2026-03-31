@@ -83,8 +83,6 @@ export async function getInitialState(): Promise<{
             avatar:
               firebaseUser.photoURL ||
               'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
-            access: role,
-            currentAuthority: (role || '').toLowerCase(),
           } as API.CurrentUser,
           settings: defaultSettings as Partial<LayoutSettings>,
         };

@@ -99,7 +99,7 @@ const Login: React.FC = () => {
   const fetchTenTaiKhoan = async (uid: string) => {
     const userDoc = await getDoc(doc(firestore, 'TaiKhoanQuanTri', uid));
     if (userDoc.exists()) return userDoc.data()?.TenDangNhap || 'Unknown';
-    return 'Unknown';
+    return 'Admin';
   };
 
   const handleRoleRedirect = async () => {
@@ -184,7 +184,7 @@ useEffect(() => {
         <LoginForm
           contentStyle={{ minWidth: 280, maxWidth: '75vw' }}
           logo={<img alt="logo" src="/image.svg" />}
-          title="Tiến lên miền miền Nam"
+          title="GYM HOME"
           subTitle={<FormattedMessage id="pages.layouts.userLayout.title" defaultMessage="Quản lý và điều hành hệ thống tiến lên miền Nam" />}
           initialValues={{ autoLogin: true }}
           actions={[
