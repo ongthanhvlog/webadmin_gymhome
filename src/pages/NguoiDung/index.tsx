@@ -1,133 +1,3 @@
-// import React, { useRef, useState, useEffect } from 'react';
-// import {ProTable, type ActionType, type ProColumns} from '@ant-design/pro-components';
-// import {ConfigProvider, Modal, Space, Form, Input, message } from 'antd';
-// import viVN from 'antd/es/locale/vi_VN';
-// import { collection, getDocs } from 'firebase/firestore';
-// import { db } from '../../../config/firebaseConfig';
-
-// interface User {
-//   id: string;
-//   UserId: string;
-//   Email: string;
-//   SoLuongBaiHocDaDangKy: number;
-// }
-
-// const UserPage: React.FC = () => {
-//   const actionRef = useRef<ActionType>(null);
-//   const [modalVisible, setModalVisible] = useState(false);
-//   const [editingUser, setEditingUser] = useState<User | undefined>();
-//   const [form] = Form.useForm();
-
-//   const fetchUsers = async (params: any) => {
-//     const snapshot = await getDocs(collection(db, 'NguoiDung'));
-
-//     let data: User[] = snapshot.docs.map((docSnap) => {
-//       const d = docSnap.data() as any;
-//       return {
-//         id: docSnap.id,
-//         UserId: d.UserId || docSnap.id,
-//         Email: d.Email || '',
-//         SoLuongBaiHocDaDangKy: Number(d.SoLuongBaiHocDaDangKy || 0),
-//       };
-//     });
-
-//     if (params?.SoLuongBaiHocDaDangKy !== undefined && params.SoLuongBaiHocDaDangKy !== '') {
-//       data = data.filter(
-//         (item) =>
-//           item.SoLuongBaiHocDaDangKy ===
-//           Number(params.SoLuongBaiHocDaDangKy),
-//       );
-//     }
-
-//     if (params?.Email) {
-//       data = data.filter((item) =>
-//         item.Email.toLowerCase().includes(params.Email.toLowerCase()),
-//       );
-//     }
-//     return { data, success: true, total: data.length};
-//   };
-
-//   useEffect(() => {
-//     if (editingUser) {
-//       form.setFieldsValue({
-//         UserId: editingUser.UserId,
-//         Email: editingUser.Email,
-//         SoLuongBaiHocDaDangKy: editingUser.SoLuongBaiHocDaDangKy,
-//       });
-//     }
-//   }, [editingUser]);
-
-//   const handleSave = async () => {
-//     message.success('Lưu dữ liệu thành công');
-//     setModalVisible(false);
-//   };
-
-//   const columns: ProColumns<User>[] = [
-//     {title: 'UserId', dataIndex: 'UserId'},
-//     {title: 'Email', dataIndex: 'Email'},
-//     {title: 'Số lượng bài học đã đăng ký',dataIndex: 'SoLuongBaiHocDaDangKy',valueType: 'text',
-//       sorter: (a, b) =>
-//         a.SoLuongBaiHocDaDangKy - b.SoLuongBaiHocDaDangKy,
-//       render: (_, record) => record.SoLuongBaiHocDaDangKy,
-//     },
-//     { title: 'Tùy chỉnh', search: false,
-//       render: (_, record) => (
-//         <Space>
-//           <a
-//             onClick={() => {
-//               setEditingUser(record);
-//               setModalVisible(true);
-//             }}
-//           >
-//             Xem chi tiết
-//           </a>
-//         </Space>
-//       ),
-//     },
-//   ];
-
-//   return (
-//     <ConfigProvider locale={viVN}>
-//       <ProTable<User>
-//         headerTitle="DANH SÁCH NGƯỜI DÙNG"
-//         actionRef={actionRef}
-//         rowKey="id"
-//         search={{ labelWidth: 'auto', resetText: 'Đặt lại', searchText: 'Tìm kiếm' }}
-//         columns={columns}
-//         request={fetchUsers}
-//         pagination={{ pageSize: 10 }}
-//       />
-
-//       <Modal
-//         title="Chi tiết người dùng"
-//         open={modalVisible}
-//         onCancel={() => setModalVisible(false)}
-//         onOk={handleSave}
-//         okText="Lưu"
-//         cancelText="Hủy"
-//       >
-//         <Form form={form} layout="vertical">
-//           <Form.Item label="UserId" name="UserId">
-//             <Input disabled />
-//           </Form.Item>
-
-//           <Form.Item label="Email" name="Email">
-//             <Input disabled />
-//           </Form.Item>
-
-//           <Form.Item
-//             label="Số lượng bài học đã đăng ký"
-//             name="SoLuongBaiHocDaDangKy"
-//           >
-//             <Input disabled />
-//           </Form.Item>
-//         </Form>
-//       </Modal>
-//     </ConfigProvider>
-//   );
-// };
-
-// export default UserPage;
 import React, { useRef, useState, useEffect } from 'react';
 import { ProTable, type ActionType, type ProColumns } from '@ant-design/pro-components';
 import { ConfigProvider, Modal, Space, Form, Input, message, Card, Typography, Divider } from 'antd';
@@ -218,7 +88,6 @@ const UserPage: React.FC = () => {
     <ConfigProvider locale={viVN}>
       <Card title={<Text strong style={{ fontSize: '18px' }}>QUẢN LÝ NGƯỜI DÙNG HỆ THỐNG</Text>}>
         
-        {/* Phần Header Tìm kiếm đồng bộ với KeHoachPage */}
         <div className="gymhome-table-container">
           <div style={{ padding: '16px 24px', background: '#fff', border: '1px solid #f0f0f0', borderRadius: '8px 8px 0 0', borderBottom: 'none' }}>
             <Text strong style={{ fontSize: '16px' }}>TÌM KIẾM NGƯỜI DÙNG</Text>
@@ -255,12 +124,11 @@ const UserPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Modal Chi tiết người dùng */}
       <Modal
         title="Thông tin chi tiết người dùng"
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
-        footer={null} // Thường xem chi tiết người dùng admin chỉ xem, không sửa trực tiếp ở đây
+        footer={null}
         width={600}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
