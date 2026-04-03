@@ -1,43 +1,18 @@
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import {
-  GoogleOutlined,
-  FacebookOutlined,
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormCheckbox,
-  ProFormText,
-} from '@ant-design/pro-components';
-import {
-  FormattedMessage,
-  Helmet,
-  SelectLang,
-  useIntl,
-  useModel,
-  history,
-  terminal,
-} from '@umijs/max';
+  Helmet, SelectLang, useIntl, useModel, history, terminal} from '@umijs/max';
 import { Alert, App, Tabs, Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { Footer } from '@/components';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../../../../config/firebaseConfig';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../../../../config/firebaseConfig';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import Settings from '../../../../config/defaultSettings';
 
 const useStyles = createStyles(({ token }) => ({
-  action: {
-    marginLeft: '8px',
-    color: 'rgba(0, 0, 0, 0.2)',
-    fontSize: '24px',
-    verticalAlign: 'middle',
-    cursor: 'pointer',
-    transition: 'color 0.3s',
-    '&:hover': { color: token.colorPrimaryActive },
-  },
   lang: {
     width: 42,
     height: 42,
@@ -58,16 +33,6 @@ const useStyles = createStyles(({ token }) => ({
   },
 }));
 
-const ActionIcons = () => {
-  const { styles } = useStyles();
-  return (
-    <>
-      <GoogleOutlined key="GoogleOutlined" className={styles.action} />
-      <FacebookOutlined key="FacebookOutlined" className={styles.action} />
-    </>
-  );
-};
-
 const Lang = () => {
   const { styles } = useStyles();
   return (
@@ -83,90 +48,98 @@ const LoginMessage: React.FC<{ content: string }> = ({ content }) => (
 
 const Login: React.FC = () => {
   const [userLoginState, setUserLoginState] = useState<{ status?: string; type?: string; message?: string }>({});
-  const [type, setType] = useState<string>('account');
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const { initialState, setInitialState } = useModel('@@initialState');
+  const { setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
   const intl = useIntl();
   const firestore = getFirestore();
 
-  const fetchUserInfo = async (uid: string) => {
-    const userDoc = await getDoc(doc(firestore, 'TaiKhoanQuanTri', uid));
-    if (userDoc.exists()) return userDoc.data()?.VaiTro || 'User';
-    return 'User';
-  };
-  const fetchTenTaiKhoan = async (uid: string) => {
-    const userDoc = await getDoc(doc(firestore, 'TaiKhoanQuanTri', uid));
-    if (userDoc.exists()) return userDoc.data()?.TenDangNhap || 'Unknown';
-    return 'Admin';
+  // Hàm kiểm tra thông tin admin trong collection TaiKhoanQuanTri
+  const fetchAdminData = async (uid: string) => {
+    try {
+      const userDoc = await getDoc(doc(firestore, 'TaiKhoanQuanTri', uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        // Kiểm tra đúng field VaiTro là "Admin"
+        if (data.VaiTro === 'Admin') {
+          return data;
+        }
+      }
+    } catch (error) {
+      console.error("Firestore Error:", error);
+    }
+    return null;
   };
 
-  const handleRoleRedirect = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const role = await fetchUserInfo(user.uid);
-        const tenTK = await fetchTenTaiKhoan(user.uid);
+  const handleRoleRedirect = async (user: any) => {
+    try {
+      const adminData = await fetchAdminData(user.uid);
+
+      if (adminData) {
+        // Nếu là Admin hợp lệ, cập nhật trạng thái hệ thống và vào trang chủ
         flushSync(() => {
           setInitialState((s) => ({
             ...s,
-            currentUser: { 
-              access: role,
-              name: tenTK,
+            currentUser: {
+              access: adminData.VaiTro,
+              name: adminData.TenDangNhap || adminData.TaiKhoan || 'Admin',
               avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
               userid: user.uid,
-              currentAuthority: role.toLowerCase(),
+              currentAuthority: adminData.VaiTro.toLowerCase(),
             },
           }));
         });
-
-        if (role === 'Admin') history.push('/welcome');
-        else if (role === 'User') history.push('/welcome');
-        else history.push('/unauthorized');
-      } catch (error) {
-        terminal.error('Error fetching user role:', error);
-        history.push('/error');
+        history.push('/welcome');
+      } else {
+        // Nếu không có quyền, ép đăng xuất và báo lỗi
+        await signOut(auth);
+        const errorMsg = 'Tài khoản không có quyền truy cập trang quản trị!';
+        setUserLoginState({ status: 'error', type: 'account', message: errorMsg });
+        message.error(errorMsg);
       }
+    } catch (error) {
+      terminal.error('Error checking admin role:', error);
+      history.push('/error');
     }
   };
 
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email + '@gmail.com', values.password);
+      // Đăng nhập Auth
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        values.email.includes('@') ? values.email : values.email + '@gmail.com',
+        values.password
+      );
+
       if (userCredential.user) {
-        message.success(intl.formatMessage({ id: 'pages.login.success', defaultMessage: 'Đăng nhập thành công！' }));
-        await handleRoleRedirect();
+        await handleRoleRedirect(userCredential.user);
       }
     } catch (error: any) {
-      const errorMessage =
-        error.code === 'auth/wrong-password'
-          ? 'Sai mật khẩu'
-          : error.code === 'auth/user-not-found'
-          ? 'Tài khoản không tồn tại'
-          : 'Đăng nhập thất bại, vui lòng thử lại！';
+      let errorMessage = 'Đăng nhập thất bại, vui lòng thử lại！';
+      if (error.code === 'auth/wrong-password') errorMessage = 'Sai mật khẩu';
+      if (error.code === 'auth/user-not-found') errorMessage = 'Tài khoản không tồn tại';
+      
       setUserLoginState({ status: 'error', type: 'account', message: errorMessage });
       message.error(errorMessage);
     }
   };
 
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      await handleRoleRedirect(); // chỉ redirect khi user tồn tại
-    }
-    setCheckingAuth(false);
-  });
-  return () => unsubscribe();
-}, []);
-
-
-  const { status, type: loginType, message: errorMessage } = userLoginState;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await handleRoleRedirect(user);
+      }
+      setCheckingAuth(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (checkingAuth) {
     return (
       <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Spin size="large" tip="Đang kiểm tra đăng nhập..." />
+        <Spin size="large" tip="Đang kiểm tra quyền truy cập..." />
       </div>
     );
   }
@@ -175,7 +148,7 @@ useEffect(() => {
     <div className={styles.container}>
       <Helmet>
         <title>
-          {intl.formatMessage({ id: 'menu.login', defaultMessage: 'Trang đăng nhập' })}
+          {intl.formatMessage({ id: 'menu.login', defaultMessage: 'Đăng nhập Quản trị' })}
           {Settings.title && ` - ${Settings.title}`}
         </title>
       </Helmet>
@@ -184,45 +157,29 @@ useEffect(() => {
         <LoginForm
           contentStyle={{ minWidth: 280, maxWidth: '75vw' }}
           logo={<img alt="logo" src="/image.svg" />}
-          title="GYM HOME"
-          subTitle={<FormattedMessage id="pages.layouts.userLayout.title" defaultMessage="Quản lý và điều hành hệ thống tiến lên miền Nam" />}
-          initialValues={{ autoLogin: true }}
-          actions={[
-            <FormattedMessage key="loginWith" id="pages.login.loginWith" defaultMessage="Các phương thức đăng nhập khác" />,
-            <ActionIcons key="icons" />,
-          ]}
+          title="GYM HOME ADMIN"
+          subTitle="Hệ thống quản lý nội bộ dành cho Admin"
           onFinish={async (values) => await handleSubmit(values as { email: string; password: string })}
           submitter={{ searchConfig: { submitText: 'Đăng nhập' } }}
         >
-          <Tabs
-            activeKey={type}
-            onChange={setType}
-            centered
-            items={[
-              { key: 'account', label: intl.formatMessage({ id: 'pages.login.accountLogin.tab', defaultMessage: 'Đăng nhập bằng tài khoản và mật khẩu' }) },
-              // { key: 'mobile', label: intl.formatMessage({ id: 'pages.login.phoneLogin.tab', defaultMessage: 'Đăng nhập bằng số điện thoại' }) },
-            ]}
-          />
-          {status === 'error' && loginType === 'account' && <LoginMessage content={errorMessage || 'Tài khoản hoặc mật khẩu sai'} />}
-          {type === 'account' && (
-            <>
-              <ProFormText
-                name="email"
-                fieldProps={{ size: 'large', prefix: <UserOutlined /> }}
-                placeholder="Enter your account"
-                rules={[
-                  { required: true, message: <FormattedMessage id="pages.login.username.required" defaultMessage="Vui lòng nhập email!" /> },
-                  // { type: 'email', message: <FormattedMessage id="pages.login.email.invalid" defaultMessage="Định dạng email không hợp lệ!" /> },
-                ]}
-              />
-              <ProFormText.Password
-                name="password"
-                fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
-                placeholder="Enter your password"
-                rules={[{ required: true, message: <FormattedMessage id="pages.login.password.required" defaultMessage="Vui lòng nhập mật khẩu!" /> }]}
-              />
-            </>
+          <Tabs centered items={[{ key: 'account', label: 'Tài khoản Quản trị viên' }]} />
+          
+          {userLoginState.status === 'error' && (
+            <LoginMessage content={userLoginState.message || 'Lỗi hệ thống'} />
           )}
+
+          <ProFormText
+            name="email"
+            fieldProps={{ size: 'large', prefix: <UserOutlined /> }}
+            placeholder="Nhập tài khoản quản trị"
+            rules={[{ required: true, message: 'Vui lòng điền thông tin!' }]}
+          />
+          <ProFormText.Password
+            name="password"
+            fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
+            placeholder="Nhập mật khẩu"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+          />
         </LoginForm>
       </div>
       <Footer />

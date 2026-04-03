@@ -1,8 +1,30 @@
+// {
+//   "compilerOptions": {
+//     "baseUrl": "./",
+//     "target": "esnext",
+//     "moduleResolution": "node",
+//     "jsx": "react-jsx",
+//     "esModuleInterop": true,
+//     "experimentalDecorators": true,
+//     "strict": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "noImplicitReturns": true,
+//     "declaration": true,
+//     "skipLibCheck": true,
+//     "resolveJsonModule": true,
+//     "paths": {
+//       "@/*": ["./src/*"],
+//       "@@/*": ["./src/.umi/*"],
+//       "@@test/*": ["./src/.umi-test/*"]
+//     }
+//   },
+//   "include": ["./**/*.d.ts", "./**/*.ts", "./**/*.tsx"]
+// }
 {
   "compilerOptions": {
-    "baseUrl": "./",
     "target": "esnext",
-    "moduleResolution": "node",
+    // 1. Thay "node" bằng "bundler" để hỗ trợ các công cụ build hiện đại
+    "moduleResolution": "bundler", 
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -12,6 +34,9 @@
     "declaration": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true, // Thường đi kèm với bundler
+    "module": "esnext",
+    "noEmit": true, // Thường dùng khi có bundler bên ngoài xử lý file
     "paths": {
       "@/*": ["./src/*"],
       "@@/*": ["./src/.umi/*"],
