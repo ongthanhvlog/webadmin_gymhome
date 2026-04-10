@@ -23,7 +23,6 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    // 1. Thay "node" bằng "bundler" để hỗ trợ các công cụ build hiện đại
     "moduleResolution": "bundler", 
     "jsx": "react-jsx",
     "esModuleInterop": true,
@@ -34,9 +33,10 @@
     "declaration": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true, // Thường đi kèm với bundler
+    "allowImportingTsExtensions": true, 
     "module": "esnext",
-    "noEmit": true, // Thường dùng khi có bundler bên ngoài xử lý file
+    "noEmit": true, 
+    "types": ["jest", "node"],
     "paths": {
       "@/*": ["./src/*"],
       "@@/*": ["./src/.umi/*"],
