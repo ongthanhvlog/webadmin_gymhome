@@ -45,6 +45,7 @@ export default [
     icon: 'TeamOutlined',
     component: './NguoiDung/index',
   },
+  
   // cấu hình route trang vùng tập trung
   {
     path: '/VungTapTrung',
@@ -52,8 +53,16 @@ export default [
     icon: 'AppstoreOutlined',
     component: './VungTapTrung/index',
   },
-  // // cấu hình route trang quản lý kế hoạch
- 
+  
+  // cấu hình route trang thử thách
+  {
+    path: '/ThuThach',
+    name: 'Quản lý thử thách',
+    icon: 'TrophyOutlined',
+    component: './ThuThach/index',
+  },
+
+  // cấu hình route trang quản lý kế hoạch
   {
     path: '/KeHoach',
     name: 'Quản lý kế hoạch',

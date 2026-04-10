@@ -1,3 +1,4 @@
+// 
 import React, { useRef, useState, useEffect } from 'react';
 import { ProTable, type ActionType, type ProColumns } from '@ant-design/pro-components';
 import { Button, Space, ConfigProvider, message, Card, Modal, Table, Form, Input, InputNumber, Popconfirm, Typography, Select, Divider, Upload, Radio, Progress } from 'antd';
@@ -55,6 +56,7 @@ interface Ngay {
     MoTa: string;
     HinhAnh: string;
     SoLuongBaiTapLon: number;
+    TongThoiGian: number; 
 }
 
 const generateCustomId = (prefix: string) => `${prefix}_${Math.floor(Math.random() * 900) + 100}`;
@@ -118,6 +120,7 @@ const KeHoachPage: React.FC = () => {
                     MoTa: data.MoTa || '',
                     HinhAnh: data.HinhAnh || '',
                     SoLuongBaiTapLon: data.SoLuongBaiTapLon || 0,
+                    TongThoiGian: data.TongThoiGian || 0,   // ← THÊM
                 });
             } else {
                 setNgayInfo({
@@ -125,22 +128,40 @@ const KeHoachPage: React.FC = () => {
                     MoTa: '',
                     HinhAnh: '',
                     SoLuongBaiTapLon: 0,
+                    TongThoiGian: 0,   // ← THÊM
                 });
             }
-            await updateSoLuongBaiTapLon();
+            await updateNgayInfoStats();
         } catch (e) {
             console.error(e);
             message.error('Lỗi tải thông tin ngày');
         }
     };
 
-    const updateSoLuongBaiTapLon = async () => {
+    const updateNgayInfoStats = async () => {
         try {
             const dayDocRef = doc(db, `KeHoach/${pathPrefix}/Ngay/ngay_${ngayDangChon}`);
             const snapshot = await getDocs(collection(db, getDayPath()));
-            const count = snapshot.size;
-            await setDoc(dayDocRef, { SoLuongBaiTapLon: count }, { merge: true });
-            setNgayInfo((prev) => (prev ? { ...prev, SoLuongBaiTapLon: count } : null));
+
+            let count = 0;
+            let totalTime = 0;
+
+            snapshot.forEach((d) => {
+                const data = d.data() as BaiTapLon;
+                count++;
+                totalTime += Number(data.TongThoiGian) || 0;
+            });
+
+            await setDoc(dayDocRef, {
+                SoLuongBaiTapLon: count,
+                TongThoiGian: totalTime
+            }, { merge: true });
+
+            setNgayInfo((prev) => (prev ? {
+                ...prev,
+                SoLuongBaiTapLon: count,
+                TongThoiGian: totalTime
+            } : null));
         } catch (e) {
             console.error(e);
         }
@@ -284,7 +305,7 @@ const KeHoachPage: React.FC = () => {
                 }
             }
 
-            await updateSoLuongBaiTapLon();
+            await updateNgayInfoStats();   // ← Cập nhật lại tổng thời gian ngày
             message.success('Đã lưu bài tập lớn thành công');
             setLonModalVisible(false);
             actionRef.current?.reload();
@@ -361,6 +382,19 @@ const KeHoachPage: React.FC = () => {
             }
 
             setDsBaiTapNho(newList);
+
+            // ← CẬP NHẬT NGAY TongThoiGian của bài tập lớn (đã thiếu trong code cũ)
+            if (editingLon) {
+                const newTotal = newList.reduce((sum, item) => sum + (Number(item.ThoiGian) || 0), 0);
+                await updateDoc(doc(db, getDayPath(), editingLon.id), {
+                    TongThoiGian: newTotal,
+                    SoLuongBaiTapNho: newList.length
+                });
+            }
+
+            // ← Cập nhật tổng thời gian của ngày (để phần Thông tin ngày luôn chính xác)
+            await updateNgayInfoStats();
+
             setNhoModalVisible(false);
             setFileList([]);
             setImageFileListNho([]);
@@ -428,6 +462,7 @@ const KeHoachPage: React.FC = () => {
                 MoTa: values.MoTa || '',
                 HinhAnh: hinhAnhUrl,
                 SoLuongBaiTapLon: ngayInfo?.SoLuongBaiTapLon || 0,
+                TongThoiGian: ngayInfo?.TongThoiGian || 0,   // ← Giữ nguyên tổng thời gian khi chỉnh sửa ngày
             }, { merge: true });
 
             setNgayInfo({
@@ -435,6 +470,7 @@ const KeHoachPage: React.FC = () => {
                 MoTa: values.MoTa || '',
                 HinhAnh: hinhAnhUrl,
                 SoLuongBaiTapLon: ngayInfo?.SoLuongBaiTapLon || 0,
+                TongThoiGian: ngayInfo?.TongThoiGian || 0,
             });
 
             message.success('Đã cập nhật thông tin ngày thành công');
@@ -451,7 +487,7 @@ const KeHoachPage: React.FC = () => {
         { title: 'ID Bài tập', dataIndex: 'id', search: false },
         { title: 'Tên bài tập lớn', dataIndex: 'TenBaiTapLon' },
         { title: 'Cấp độ', dataIndex: 'CapDo', valueType: 'select', valueEnum: { 'Dễ': { text: 'Dễ' }, 'Khó': { text: 'Khó' } }},
-        { title: 'Số lượng bài',dataIndex: 'SoLuongBaiTapNho', valueType: 'digit', sorter: (a, b) => a.SoLuongBaiTapNho - b.SoLuongBaiTapNho},
+        { title: 'Số lượng bài tập nhỏ',dataIndex: 'SoLuongBaiTapNho', valueType: 'digit', sorter: (a, b) => a.SoLuongBaiTapNho - b.SoLuongBaiTapNho},
         { title: 'Tổng Thời Gian', dataIndex: 'TongThoiGian', valueType: 'digit', sorter: (a, b) => a.TongThoiGian - b.TongThoiGian},
         { title: 'Mô tả', dataIndex: 'MoTa', search: false,
             render: (_, record) => (
@@ -487,7 +523,7 @@ const KeHoachPage: React.FC = () => {
                     title="Xác nhận xóa?"
                     onConfirm={async () => {
                         await deleteDoc(doc(db, getDayPath(), record.id));
-                        await updateSoLuongBaiTapLon();
+                        await updateNgayInfoStats();   // ← Cập nhật lại tổng thời gian ngày
                         actionRef.current?.reload();
                     }}
                 >
@@ -544,6 +580,7 @@ const KeHoachPage: React.FC = () => {
                                     TongThoiGian: newTotal,
                                     SoLuongBaiTapNho: newList.length
                                 });
+                                await updateNgayInfoStats();   // ← Cập nhật tổng thời gian ngày
                             }
                         }}
                     >
@@ -574,56 +611,76 @@ const KeHoachPage: React.FC = () => {
                         </div>
                     ))}
                 </div>
-                <Card
-                    title={<Title level={5} style={{ margin: 0 }}>THÔNG TIN NGÀY {ngayDangChon}</Title>}
-                    style={{ marginBottom: 24 }}
-                    extra={
-                        <Button type="primary" onClick={handleEditNgay}>
-                            Chỉnh sửa thông tin ngày
-                        </Button>
-                    }
-                >
-                    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-                        {ngayInfo?.HinhAnh ? (
-                            <img
-                                src={ngayInfo.HinhAnh}
-                                alt="Hình ảnh ngày"
-                                style={{
-                                    width: 280,
-                                    height: 200,
-                                    objectFit: 'cover',
-                                    borderRadius: 8,
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                }}
-                            />
-                        ) : (
-                            <div style={{
-                                width: 280,
-                                height: 200,
-                                background: '#f5f5f5',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: 8,
-                                color: '#999',
-                                border: '2px dashed #d9d9d9'
-                            }}>
-                                Chưa có hình ảnh
-                            </div>
-                        )}
+            <Card title={<Title level={5} style={{ margin: 0 }}>THÔNG TIN NGÀY {ngayDangChon}</Title>}
+                style={{ marginBottom: 24 }}
+                extra={
+                    <Button type="primary" onClick={handleEditNgay}>
+                        Chỉnh sửa thông tin ngày
+                    </Button>
+                }
+        >
+            <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+                {ngayInfo?.HinhAnh ? (
+                <img
+                    src={ngayInfo.HinhAnh}
+                    alt="Hình ảnh ngày"
+                    style={{
+                        width: 300,
+                        height: 220,
+                        objectFit: 'cover',
+                        borderRadius: 12,
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                        flexShrink: 0,
+                    }}
+                />
+            ) : (
+                <div style={{
+                    width: 300,
+                    height: 220,
+                    background: '#f5f5f5',
+                    borderRadius: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#999',
+                    border: '2px dashed #d9d9d9',
+                    flexShrink: 0,
+                }}>
+                    Chưa có hình ảnh
+                </div>
+            )}
 
-                        <div style={{ flex: 1 }}>
-                            <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 8 }}>Mô tả:</Text>
-                            <Paragraph style={{ fontSize: 15, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                                {ngayInfo?.MoTa || 'Chưa có mô tả cho ngày này.'}
-                            </Paragraph>
-                            <Divider style={{ margin: '16px 0' }} />
-                            <Space align="center">
-                                <Text strong>Số lượng bài tập lớn:</Text>
-                                <Text type="success" strong style={{ fontSize: 18 }}>
-                                    {ngayInfo?.SoLuongBaiTapLon || 0}
+            <div style={{ flex: 1 }}>
+                <Text strong style={{ fontSize: 17, display: 'block', marginBottom: 8, color: '#1890ff' }}>
+                    Mô tả:
+                </Text>
+                <Paragraph
+                    style={{
+                        fontSize: 15.5,
+                        lineHeight: 1.8,
+                        whiteSpace: 'pre-wrap',
+                        color: '#333',
+                    }}
+                        >
+                            {ngayInfo?.MoTa || 'Chưa có mô tả cho ngày này.'}
+                        </Paragraph>
+                        <Divider style={{ margin: '24px 0 20px 0' }} />
+                        <div style={{ display: 'flex', gap: 64 }}>
+                            <div>
+                                <Text strong style={{ fontSize: 15, color: '#555' }}>
+                                    Số lượng bài tập lớn
                                 </Text>
-                            </Space>
+                                <div style={{ fontSize: 28, fontWeight: 700, color: '#52c41a', marginTop: 4 }}>                                        {ngayInfo?.SoLuongBaiTapLon || 0}                                    </div>
+                                </div>
+                                <div>
+                                    <Text strong style={{ fontSize: 15, color: '#555' }}>
+                                        Tổng thời gian
+                                    </Text>
+                                    <div style={{ fontSize: 28, fontWeight: 700, color: '#52c41a', marginTop: 4 }}>
+                                        {ngayInfo?.TongThoiGian || 0}{' '}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </Card>
@@ -864,7 +921,7 @@ const KeHoachPage: React.FC = () => {
                     <Form.Item name="TenBaiTapNho" label="Tên bài tập" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="ThoiGian" label="Thời gian (giây)" rules={[{ required: true }]}>
+                    <Form.Item name="ThoiGian" label="Thời gian" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
 

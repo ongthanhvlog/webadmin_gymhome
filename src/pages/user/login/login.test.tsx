@@ -1,4 +1,6 @@
-﻿import { TestBrowser } from '@@/testBrowser';
+﻿/// <reference types="jest" />
+
+import { TestBrowser } from '@@/testBrowser';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React, { act } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -20,9 +22,7 @@ const waitTime = (time: number = 100) => {
   });
 };
 
-/**
- * Test login page with Firebase Authentication
- */
+
 describe('Login Page (Firebase)', () => {
   const testEmail = 'test@example.com';
   const testPassword = 'Test@123';

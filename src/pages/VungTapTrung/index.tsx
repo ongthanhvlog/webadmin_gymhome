@@ -42,8 +42,9 @@ interface BaiTapLon {
     id: string;
     TenBaiTapLon: string;
     CapDo: string;
-    ThoiGian: number;
+    TongThoiGian: number;
     SoLuongNguoiDangKy: number;
+    SoLuongBaiTapNho: number;
     MoTa?: string;
     HinhAnh: string;
 }
@@ -216,11 +217,27 @@ const VungTapTrungPage: React.FC = () => {
         }
         try {
             const snapshot = await getDocs(collection(db, `VungTapTrung/${vungDangChon}/DanhSachBaiTapLon`));
-            let data: BaiTapLon[] = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+            const data: BaiTapLon[] = await Promise.all(
+                snapshot.docs.map(async (d) => {
+                    const baiTapData = d.data() as any;
+                    const nhoSnapshot = await getDocs(
+                        collection(db, `VungTapTrung/${vungDangChon}/DanhSachBaiTapLon/${d.id}/DanhSachBaiTapNho`)
+                    );
+                    const tongThoiGian = baiTapData.TongThoiGian ?? baiTapData.ThoiGian ?? 0;
+                    return {
+                        id: d.id,
+                        ...baiTapData,
+                        TongThoiGian: tongThoiGian,
+                        ThoiGian: tongThoiGian,
+                        SoLuongBaiTapNho: nhoSnapshot.size,
+                    } as BaiTapLon;
+                })
+            );
+            let filtered = data;
             if (params?.TenBaiTapLon) {
-                data = data.filter((item) => item.TenBaiTapLon.toLowerCase().includes(params.TenBaiTapLon.toLowerCase()));
+                filtered = filtered.filter((item) => item.TenBaiTapLon.toLowerCase().includes(params.TenBaiTapLon.toLowerCase()));
             }
-            return { data, success: true, total: data.length };
+            return { data: filtered, success: true, total: filtered.length };
         } catch (error) {
             console.error(error);
             return { data: [], success: false };
@@ -331,8 +348,10 @@ const VungTapTrungPage: React.FC = () => {
 
             const baiTapData = {
                 ...values,
+                TongThoiGian: totalSeconds,
                 ThoiGian: totalSeconds,
                 SoLuongNguoiDangKy: Number(values.SoLuongNguoiDangKy) || 0,
+                SoLuongBaiTapNho: dsBaiTapNho.length,
                 HinhAnh: hinhAnhUrl,
             };
 
@@ -494,7 +513,8 @@ const VungTapTrungPage: React.FC = () => {
         { title: 'ID Bài tập', dataIndex: 'id', search: false, width: 120 },
         { title: 'Tên bài tập lớn', dataIndex: 'TenBaiTapLon' },
         { title: 'Cấp độ', dataIndex: 'CapDo', valueType: 'select', valueEnum: { 'Dễ': { text: 'Dễ' }, 'Khó': { text: 'Khó' } } },
-        { title: 'Tổng Thời Gian', dataIndex: 'ThoiGian', valueType: 'digit', sorter: (a, b) => a.ThoiGian - b.ThoiGian },
+        { title: 'Số lượng bài tập nhỏ', dataIndex: 'SoLuongBaiTapNho', valueType: 'digit', sorter: (a, b) => a.SoLuongBaiTapNho - b.SoLuongBaiTapNho },
+        { title: 'Tổng Thời Gian', dataIndex: 'TongThoiGian', valueType: 'digit', sorter: (a, b) => a.TongThoiGian - b.TongThoiGian },
         { title: 'Số lượng người đăng ký', dataIndex: 'SoLuongNguoiDangKy', valueType: 'digit', sorter: (a, b) => a.SoLuongNguoiDangKy - b.SoLuongNguoiDangKy },
         { title: 'Mô tả', dataIndex: 'MoTa', search: false,
             render: (_, record) => (
@@ -605,7 +625,7 @@ const VungTapTrungPage: React.FC = () => {
                                         const totalSeconds = newList.reduce((sum, item) => sum + (Number(item.ThoiGian) || 0), 0);
                                         await updateDoc(
                                             doc(db, `VungTapTrung/${vungDangChon}/DanhSachBaiTapLon`, editingBaiTap.id),
-                                            { ThoiGian: totalSeconds }
+                                            { TongThoiGian: totalSeconds, ThoiGian: totalSeconds }
                                         );
                                     }
                                 }}
@@ -813,7 +833,6 @@ const VungTapTrungPage: React.FC = () => {
                 </div>
             </Card>
 
-            {/* Modal chi tiết bài tập lớn - có hình ảnh + cột hình ảnh bài nhỏ */}
             <Modal
                 title="Chi tiết bài tập lớn"
                 open={detailVisible}
@@ -840,7 +859,7 @@ const VungTapTrungPage: React.FC = () => {
                                 src={currentBaiTap.HinhAnh}
                                 alt="Hình ảnh bài tập lớn"
                                 style={{
-                                    width: '100%',
+                                    width: '50%',
                                     maxHeight: 400,
                                     objectFit: 'contain',
                                     borderRadius: 12,
@@ -877,7 +896,6 @@ const VungTapTrungPage: React.FC = () => {
                 />
             </Modal>
 
-            {/* Modal tạo / sửa Bài tập lớn - có phần upload hình ảnh */}
             <Modal
                 title={editingBaiTap ? 'Chỉnh sửa bài tập lớn' : 'Tạo bài tập lớn mới'}
                 open={baiTapModalVisible}
@@ -907,7 +925,6 @@ const VungTapTrungPage: React.FC = () => {
                         <Input.TextArea rows={3} />
                     </Form.Item>
 
-                    {/* Phần upload hình ảnh Bài tập lớn */}
                     <div style={{ marginBottom: 24 }}>
                         <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
                             Hình ảnh đại diện cho bài tập lớn:
@@ -948,7 +965,6 @@ const VungTapTrungPage: React.FC = () => {
                     </div>
                 </Form>
 
-                {/* Danh sách bài tập nhỏ */}
                 <div style={{ marginTop: 20, borderTop: '1px solid #f0f0f0', paddingTop: 20 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                         <Text strong>Danh sách bài tập nhỏ ({dsBaiTapNho.length})</Text>
@@ -990,7 +1006,6 @@ const VungTapTrungPage: React.FC = () => {
                 </div>
             </Modal>
 
-            {/* Modal Bài tập nhỏ - có thêm hình ảnh */}
             <Modal
                 title={editingNho ? 'Cập nhật bài tập nhỏ' : 'Thêm bài tập nhỏ'}
                 open={nhoModalVisible}
@@ -1009,7 +1024,6 @@ const VungTapTrungPage: React.FC = () => {
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
 
-                    {/* Video */}
                     <div style={{ marginBottom: 16 }}>
                         <label style={{ display: 'block', marginBottom: 8 }}>Video hướng dẫn:</label>
                         <Radio.Group
@@ -1043,7 +1057,6 @@ const VungTapTrungPage: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Hình ảnh bài tập nhỏ */}
                     <div style={{ marginBottom: 16 }}>
                         <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Hình ảnh cho bài tập nhỏ:</label>
                         <Radio.Group
@@ -1080,7 +1093,6 @@ const VungTapTrungPage: React.FC = () => {
                 </Form>
             </Modal>
 
-            {/* Modal chỉnh sửa thông tin vùng */}
             <Modal
                 title={`Chỉnh sửa thông tin vùng ${vungInfo?.TenVung || ''}`}
                 open={vungModalVisible}
