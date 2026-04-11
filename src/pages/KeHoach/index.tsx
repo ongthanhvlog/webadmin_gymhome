@@ -121,7 +121,7 @@ const KeHoachPage: React.FC = () => {
                     MoTa: data.MoTa || '',
                     HinhAnh: data.HinhAnh || '',
                     SoLuongBaiTapLon: data.SoLuongBaiTapLon || 0,
-                    TongThoiGian: data.TongThoiGian || 0,   // ← THÊM
+                    TongThoiGian: data.TongThoiGian || 0, 
                 });
             } else {
                 setNgayInfo({
@@ -129,7 +129,7 @@ const KeHoachPage: React.FC = () => {
                     MoTa: '',
                     HinhAnh: '',
                     SoLuongBaiTapLon: 0,
-                    TongThoiGian: 0,   // ← THÊM
+                    TongThoiGian: 0,  
                 });
             }
             await updateNgayInfoStats();
@@ -143,21 +143,17 @@ const KeHoachPage: React.FC = () => {
         try {
             const dayDocRef = doc(db, `KeHoach/${pathPrefix}/Ngay/ngay_${ngayDangChon}`);
             const snapshot = await getDocs(collection(db, getDayPath()));
-
             let count = 0;
             let totalTime = 0;
-
             snapshot.forEach((d) => {
                 const data = d.data() as BaiTapLon;
                 count++;
                 totalTime += Number(data.TongThoiGian) || 0;
             });
-
             await setDoc(dayDocRef, {
                 SoLuongBaiTapLon: count,
                 TongThoiGian: totalTime
             }, { merge: true });
-
             setNgayInfo((prev) => (prev ? {
                 ...prev,
                 SoLuongBaiTapLon: count,
