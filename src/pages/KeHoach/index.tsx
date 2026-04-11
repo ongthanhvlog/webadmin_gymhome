@@ -36,6 +36,7 @@ interface BaiTapNho {
     MoTa: string;
     ThoiGian: number;
     SoThuTu: number;
+    MET: number;
     VideoHuongDan: string;
     VideoType?: 'url' | 'file';
     HinhAnh: string;                    
@@ -305,7 +306,7 @@ const KeHoachPage: React.FC = () => {
                 }
             }
 
-            await updateNgayInfoStats();   // ← Cập nhật lại tổng thời gian ngày
+            await updateNgayInfoStats();  
             message.success('Đã lưu bài tập lớn thành công');
             setLonModalVisible(false);
             actionRef.current?.reload();
@@ -383,7 +384,6 @@ const KeHoachPage: React.FC = () => {
 
             setDsBaiTapNho(newList);
 
-            // ← CẬP NHẬT NGAY TongThoiGian của bài tập lớn (đã thiếu trong code cũ)
             if (editingLon) {
                 const newTotal = newList.reduce((sum, item) => sum + (Number(item.ThoiGian) || 0), 0);
                 await updateDoc(doc(db, getDayPath(), editingLon.id), {
@@ -391,10 +391,7 @@ const KeHoachPage: React.FC = () => {
                     SoLuongBaiTapNho: newList.length
                 });
             }
-
-            // ← Cập nhật tổng thời gian của ngày (để phần Thông tin ngày luôn chính xác)
             await updateNgayInfoStats();
-
             setNhoModalVisible(false);
             setFileList([]);
             setImageFileListNho([]);
@@ -462,7 +459,7 @@ const KeHoachPage: React.FC = () => {
                 MoTa: values.MoTa || '',
                 HinhAnh: hinhAnhUrl,
                 SoLuongBaiTapLon: ngayInfo?.SoLuongBaiTapLon || 0,
-                TongThoiGian: ngayInfo?.TongThoiGian || 0,   // ← Giữ nguyên tổng thời gian khi chỉnh sửa ngày
+                TongThoiGian: ngayInfo?.TongThoiGian || 0,   
             }, { merge: true });
 
             setNgayInfo({
@@ -538,6 +535,7 @@ const KeHoachPage: React.FC = () => {
         { title: 'STT', dataIndex: 'SoThuTu', width: 60 },
         { title: 'Tên bài', dataIndex: 'TenBaiTapNho', width: 200 },
         { title: 'Thời gian', dataIndex: 'ThoiGian', width: 100, render: (v: number) => `${v}s` },
+        { title: 'MET', dataIndex: 'MET', width: 80, render: (v?: number) => (v != null ? v.toFixed(1) : '-') },
         { title: 'Hình ảnh', dataIndex: 'HinhAnh', width: 90,
             render: (url: string) => url ? (
                 <img src={url} alt="" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} />
@@ -670,7 +668,7 @@ const KeHoachPage: React.FC = () => {
                                 <Text strong style={{ fontSize: 15, color: '#555' }}>
                                     Số lượng bài tập lớn
                                 </Text>
-                                <div style={{ fontSize: 28, fontWeight: 700, color: '#52c41a', marginTop: 4 }}>                                        {ngayInfo?.SoLuongBaiTapLon || 0}                                    </div>
+                                <div style={{ fontSize: 28, fontWeight: 700, color: '#52c41a', marginTop: 4 }}>{ngayInfo?.SoLuongBaiTapLon || 0}</div>
                                 </div>
                                 <div>
                                     <Text strong style={{ fontSize: 15, color: '#555' }}>
@@ -924,8 +922,11 @@ const KeHoachPage: React.FC = () => {
                     <Form.Item name="ThoiGian" label="Thời gian" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
+                    <Form.Item name="MET" label="MET (Chỉ số cường độ vận động)" rules={[{ required: true, type: 'number', min: 0 }]}>
+                        <InputNumber 
+                            style={{ width: '100%' }} min={0} step={0.1} precision={1}/>
+                    </Form.Item>
 
-                    {/* Video */}
                     <div style={{ marginBottom: 16 }}>
                         <label style={{ display: 'block', marginBottom: 8 }}>Video hướng dẫn:</label>
                         <Radio.Group

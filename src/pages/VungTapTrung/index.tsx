@@ -33,6 +33,7 @@ interface BaiTapNho {
     MoTa: string;
     ThoiGian: number;
     SoThuTu: number;
+    MET: number;
     VideoHuongDan: string;
     VideoType?: 'url' | 'file';
     HinhAnh: string;
@@ -571,6 +572,7 @@ const VungTapTrungPage: React.FC = () => {
         { title: 'STT', dataIndex: 'SoThuTu', width: 60 },
         { title: 'Tên bài', dataIndex: 'TenBaiTapNho', width: 200 },
         { title: 'Thời gian', dataIndex: 'ThoiGian', width: 100, render: (v: number) => `${v}s` },
+        { title: 'MET', dataIndex: 'MET', width: 80, render: (v?: number) => (v != null ? v.toFixed(1) : '-') },
         { title: 'Hình ảnh', dataIndex: 'HinhAnh', width: 90,
             render: (url: string) =>
                 url ? (
@@ -647,7 +649,6 @@ const VungTapTrungPage: React.FC = () => {
     return (
         <ConfigProvider locale={viVN}>
             <Card title="QUẢN LÝ VÙNG TẬP TRUNG" style={{ borderRadius: 12 }} bodyStyle={{ padding: 0 }}>
-                {/* Danh sách vùng (card) - bỏ Tooltip */}
                 <div style={{ padding: '24px 24px 0' }}>
                     <div
                         style={{
@@ -715,7 +716,6 @@ const VungTapTrungPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Card thông tin vùng tập trung (tương tự THÔNG TIN NGÀY) */}
                 <Card
                     title={<Title level={5} style={{ margin: 0 }}>THÔNG TIN VÙNG TẬP TRUNG</Title>}
                     style={{ margin: '0 24px 24px' }}
@@ -769,7 +769,6 @@ const VungTapTrungPage: React.FC = () => {
                     </div>
                 </Card>
 
-                {/* Table danh sách bài tập lớn */}
                 <div className="gymhome-table-container" style={{ padding: '0 24px 24px' }}>
                     <div
                         style={{
@@ -1022,6 +1021,11 @@ const VungTapTrungPage: React.FC = () => {
                     </Form.Item>
                     <Form.Item name="ThoiGian" label="Thời gian (giây)" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
+                    </Form.Item>
+                    <Form.Item name="MET" label="MET (Chỉ số cường độ vận động)" rules={[{ required: true, type: 'number', min: 0 }]}>
+                        <InputNumber 
+                            style={{ width: '100%' }} min={0} step={0.1} precision={1}
+                        />
                     </Form.Item>
 
                     <div style={{ marginBottom: 16 }}>
