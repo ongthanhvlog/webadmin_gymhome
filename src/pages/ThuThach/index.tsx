@@ -15,6 +15,7 @@ interface ThuThach {
     MoTa: string;
     CapDo: string;
     ThoiGian: number;
+    MET: number;
     VideoHuongDan: string;
     VideoType?: 'url' | 'file';
     HinhAnh: string;
@@ -147,6 +148,7 @@ const ThuThachPage: React.FC = () => {
                 MoTa: values.MoTa || '',
                 CapDo: values.CapDo,
                 ThoiGian: Number(values.ThoiGian) || 0,
+                MET: Number(values.MET) || 0,
                 VideoHuongDan: videoUrl,
                 VideoType: finalVideoType,
                 HinhAnh: hinhAnhUrl,
@@ -175,8 +177,9 @@ const ThuThachPage: React.FC = () => {
         { title: 'Tên thử thách', dataIndex: 'TenThuThach' },
         { title: 'Cấp độ', dataIndex: 'CapDo', valueType: 'select', valueEnum: { 'Dễ': { text: 'Dễ' }, 'Khó': { text: 'Khó' } } },
         { title: 'Thời Gian', dataIndex: 'ThoiGian', valueType: 'digit', render: (_, record) => `${record.ThoiGian || 0} `, sorter: (a, b) => a.ThoiGian - b.ThoiGian,width: 120 },
+        { title: 'MET (Cường độ vận động)', dataIndex: 'MET', width: 200, render: (_, record) => record.MET ? record.MET.toFixed(1) : '0.0' },
         { title: 'Mô tả', dataIndex: 'MoTa', search: false, render: (_, record) => <a onClick={() => { setCurrentThuThach(record); setDetailVisible(true); }}>Xem chi tiết</a> },
-        { title: 'Video hướng dẫn', dataIndex: 'VideoHuongDan', search: false, width: 170,
+        { title: 'Video hướng dẫn', dataIndex: 'VideoHuongDan', search: false, width: 150,
             render: (_, record) => {
                 const url = record.VideoHuongDan;
                 return url ? (
@@ -197,6 +200,7 @@ const ThuThachPage: React.FC = () => {
                             TenThuThach: record.TenThuThach, 
                             CapDo: record.CapDo, 
                             ThoiGian: record.ThoiGian, 
+                            MET: record.MET,
                             MoTa: record.MoTa, 
                             VideoHuongDan: record.VideoHuongDan || '', 
                             HinhAnh: record.HinhAnh || '' 
@@ -333,6 +337,9 @@ const ThuThachPage: React.FC = () => {
                         </Form.Item>
                         <Form.Item name="ThoiGian" label="Thời gian " rules={[{ required: true }]} style={{ width: 180 }}>
                             <InputNumber min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item name="MET" label="MET (Chỉ số cường độ vận động)" rules={[{ required: true, type: 'number', min: 0 }]}>
+                            <InputNumber style={{ width: '100%' }} min={0} step={0.1} precision={1}/>
                         </Form.Item>
                     </Space>
 
