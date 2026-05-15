@@ -22,7 +22,7 @@ interface NguoiDung {
   };
 }
 
-const UserPage: React.FC = () => {
+const NguoiDungPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<NguoiDung | undefined>();
@@ -161,7 +161,7 @@ const UserPage: React.FC = () => {
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Tổng calo" name={['ThongTinNguoiDung', 'TongCalo']}>
+              <Form.Item label="Tổng calo" name={['ThongTinNguoiDung', 'TongCalo']} getValueProps={(value) => ({ value: value !== undefined ? Number(value).toFixed(2) : '' })}>
                 <Input disabled style={{ color: 'rgba(0, 0, 0, 0.88)', backgroundColor: '#ffffff' }} />
               </Form.Item>
             </Col>
@@ -179,4 +179,4 @@ const UserPage: React.FC = () => {
   );
 };
 
-export default UserPage;
+export default NguoiDungPage;
