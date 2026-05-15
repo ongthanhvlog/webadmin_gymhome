@@ -31,12 +31,12 @@ export default [
     icon: 'smile',
     component: './Welcome',
   },
-  //Tong quan bao cao
+  //cấu hình route trang quản lý bài viết
   {
-    path: '/TongQuan',
-    name: 'Tổng quan',
-    icon: 'BarChartOutlined',
-    component: './TongQuan/index',
+    path: '/BaiViet',
+    name: 'Quản lý bài viết',
+    icon: 'ReadOutlined',
+    component: './BaiViet/index',
   },
   //cấu hình route trang người dùng
   {
