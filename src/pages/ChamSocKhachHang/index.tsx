@@ -1,84 +1,78 @@
-import {
-  type ActionType,
-  type ProColumns,
-  ProTable,
-} from '@ant-design/pro-components';
-import {
-  Button,
-  ConfigProvider,
-  Modal,
-  message,
-  Space,
-  Form,
-  Input,
-} from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
+import { type ActionType, type ProColumns, ProTable } from '@ant-design/pro-components';
+import { Button, ConfigProvider, Modal, message, Space, Form, Input, Card, Typography, Divider } from 'antd';
 import viVN from 'antd/es/locale/vi_VN';
 import { collection, doc, getDocs, updateDoc, serverTimestamp } from 'firebase/firestore';
-import React, { useRef, useState, useEffect } from 'react';
 import { db } from '../../../config/firebaseConfig';
 
-// Kiểu dữ liệu
-export type SupportItem = {
+const { Text } = Typography;
+
+interface ChamSocKhachHang {
   id: string;
-  tenDangNhap: string;
+  Email: string;
   tieuDe: string;
   noiDung: string;
   thoiGianTao: Date;
   phanHoi: string;
   thoiGianPhanHoi?: Date | null;
   trangThai: number;
-};
+}
 
 const SupportPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingSupport, setEditingSupport] = useState<SupportItem | undefined>(undefined);
+  const [editingSupport, setEditingSupport] = useState<ChamSocKhachHang | undefined>(undefined);
   const [form] = Form.useForm();
 
-  // Lấy dữ liệu từ Firebase
+  // Lấy dữ liệu từ Firebase (camelCase)
   const fetchSupports = async (params?: any) => {
     try {
       const snapshot = await getDocs(collection(db, 'ChamSocKhachHang'));
-      let data: SupportItem[] = snapshot.docs.map((docSnap) => {
+      
+      let data: ChamSocKhachHang[] = snapshot.docs.map((docSnap) => {
         const d = docSnap.data() as any;
         return {
           id: docSnap.id,
-          tenDangNhap: d.TenDangNhap || '',
-          tieuDe: d.TieuDe || (d.NoiDung ? d.NoiDung.split(' ').slice(0, 3).join(' ') + '...' : ''),
-          noiDung: d.NoiDung || '',
-          thoiGianTao: d.ThoiGianTao?.toDate ? d.ThoiGianTao.toDate() : new Date(d.ThoiGianTao),
-          phanHoi: d.PhanHoi || '',
-          thoiGianPhanHoi: d.ThoiGianPhanHoi?.toDate ? d.ThoiGianPhanHoi.toDate() : d.ThoiGianPhanHoi ? new Date(d.ThoiGianPhanHoi) : null,
-          trangThai: d.TrangThai ?? (d.PhanHoi && d.PhanHoi.trim() !== '' ? 2 : 1), //
+          Email: d.Email || '',
+          tieuDe: d.tieuDe || d.TieuDe || (d.noiDung ? d.noiDung.split(' ').slice(0, 3).join(' ') + '...' : ''),
+          noiDung: d.noiDung || d.NoiDung || '',
+          thoiGianTao: d.thoiGianTao?.toDate 
+            ? d.thoiGianTao.toDate() 
+            : new Date(d.thoiGianTao || Date.now()),
+          phanHoi: d.phanHoi || d.PhanHoi || '',
+          thoiGianPhanHoi: d.thoiGianPhanHoi?.toDate 
+            ? d.thoiGianPhanHoi.toDate() 
+            : d.thoiGianPhanHoi ? new Date(d.thoiGianPhanHoi) : null,
+          trangThai: d.trangThai ?? (d.phanHoi && d.phanHoi.trim() !== '' ? 2 : 1),
         };
       });
 
-      // --- Bộ lọc tìm kiếm ---
-      if (params?.tenDangNhap) {
-        data = data.filter((item) => item.tenDangNhap.toLowerCase().includes(params.tenDangNhap.toLowerCase()));
+      // Bộ lọc tìm kiếm
+      if (params?.Email) {
+        data = data.filter((item) =>
+          item.Email.toLowerCase().includes(params.Email.toLowerCase())
+        );
       }
 
       if (params?.tieuDe) {
-        data = data.filter((item) => item.tieuDe.toLowerCase().includes(params.tieuDe.toLowerCase()));
+        data = data.filter((item) =>
+          item.tieuDe.toLowerCase().includes(params.tieuDe.toLowerCase())
+        );
       }
 
       if (params?.trangThai !== undefined && params.trangThai !== '') {
         data = data.filter((item) => item.trangThai === Number(params.trangThai));
       }
 
-      // Lọc theo thời gian tạo
-      const createdAt: Date | undefined = params?.thoiGianTao;
-      if (createdAt) {
-        data = data.filter(
-          (item) => item.thoiGianTao.toDateString() === new Date(createdAt).toDateString(),
-        );
+      if (params?.thoiGianTao) {
+        const filterDate = new Date(params.thoiGianTao).toDateString();
+        data = data.filter((item) => item.thoiGianTao.toDateString() === filterDate);
       }
 
-      // Lọc theo thời gian phản hồi
-      const repliedAt: Date | undefined = params?.thoiGianPhanHoi;
-      if (repliedAt) {
-        data = data.filter(
-          (item) => item.thoiGianPhanHoi && item.thoiGianPhanHoi.toDateString() === new Date(repliedAt).toDateString(),
+      if (params?.thoiGianPhanHoi) {
+        const filterDate = new Date(params.thoiGianPhanHoi).toDateString();
+        data = data.filter((item) =>
+          item.thoiGianPhanHoi && item.thoiGianPhanHoi.toDateString() === filterDate
         );
       }
 
@@ -90,7 +84,7 @@ const SupportPage: React.FC = () => {
     }
   };
 
-  // Khi mở modal xử lý
+  // Khi mở modal
   useEffect(() => {
     if (editingSupport) {
       form.setFieldsValue({ phanHoi: editingSupport.phanHoi || '' });
@@ -106,21 +100,23 @@ const SupportPage: React.FC = () => {
       if (!editingSupport) return;
 
       const phanHoi = values.phanHoi?.trim() || '';
-      let newTrangThai = editingSupport.trangThai; // giữ nguyên trạng thái mặc định
+      let newTrangThai = editingSupport.trangThai;
 
-      // Nếu có phản hồi và chưa xử lý xong => chuyển sang đã xử lý
       if (phanHoi !== '' && editingSupport.trangThai !== 2) {
         newTrangThai = 2;
       }
 
       await updateDoc(doc(db, 'ChamSocKhachHang', editingSupport.id), {
-        PhanHoi: phanHoi,
-        ThoiGianPhanHoi: phanHoi !== '' ? serverTimestamp() : null,
-        TrangThai: newTrangThai,
+        phanHoi: phanHoi,
+        thoiGianPhanHoi: phanHoi !== '' ? serverTimestamp() : null,
+        trangThai: newTrangThai,
       });
 
-      if (phanHoi !== '' && newTrangThai === 2) message.success('Đã gửi phản hồi đến người chơi!');
-      else message.info('Phản hồi trống — yêu cầu vẫn đang chờ xử lý.');
+      if (phanHoi !== '' && newTrangThai === 2) {
+        message.success('Đã gửi phản hồi đến người dùng!');
+      } else {
+        message.info('Phản hồi trống — yêu cầu vẫn đang chờ xử lý.');
+      }
 
       setModalVisible(false);
       setEditingSupport(undefined);
@@ -131,26 +127,25 @@ const SupportPage: React.FC = () => {
     }
   };
 
-  // --- Cấu hình cột ProTable ---
-  const columns: ProColumns<SupportItem>[] = [
-    {
-      title: 'Tên đăng nhập',
-      dataIndex: 'tenDangNhap',
-      valueType: 'text',
-      fieldProps: { placeholder: 'Tìm tên đăng nhập' },
+  const columns: ProColumns<ChamSocKhachHang>[] = [
+    { 
+      title: 'Email', 
+      dataIndex: 'Email', 
+      valueType: 'text', 
+      fieldProps: { placeholder: 'Tìm theo Email' } 
     },
-    {
-      title: 'Tiêu đề',
-      dataIndex: 'tieuDe',
-      valueType: 'text',
-      fieldProps: { placeholder: 'Tìm tiêu đề' },
+    { 
+      title: 'Tiêu đề', 
+      dataIndex: 'tieuDe', 
+      valueType: 'text', 
+      fieldProps: { placeholder: 'Tìm tiêu đề' } 
     },
-    {
-      title: 'Nội dung',
-      dataIndex: 'noiDung',
+    { 
+      title: 'Nội dung', 
+      dataIndex: 'noiDung', 
+      search: false,
       render: (_, record) => (
-        <a
-          onClick={() =>
+        <a onClick={() =>
             Modal.info({
               title: 'Chi tiết nội dung',
               width: 600,
@@ -175,48 +170,42 @@ const SupportPage: React.FC = () => {
               okText: 'Đóng',
             })
           }
-        >
-          Xem chi tiết
-        </a>
+        > Xem chi tiết </a>
       ),
-      search: false,
     },
-    {
-      title: 'Thời gian tạo',
-      dataIndex: 'thoiGianTao',
-      valueType: 'date',
+    { 
+      title: 'Thời gian tạo', 
+      dataIndex: 'thoiGianTao', 
+      valueType: 'date', 
       sorter: (a, b) => a.thoiGianTao.getTime() - b.thoiGianTao.getTime(),
-      render: (_, r) => r.thoiGianTao?.toLocaleString?.() || '',
+      render: (_, record) => record.thoiGianTao?.toLocaleString?.() || '',
     },
-    {
-      title: 'Phản hồi',
-      dataIndex: 'phanHoi',
+    { 
+      title: 'Phản hồi', 
+      dataIndex: 'phanHoi', 
+      search: false,
       render: (_, record) => (
-        <a
-          onClick={() => {
+        <a onClick={() => {
             setEditingSupport(record);
             setModalVisible(true);
           }}
-        >
-          Xử lý yêu cầu
-        </a>
+        >Xử lý yêu cầu</a>
       ),
-      search: false,
     },
-    {
-      title: 'Thời gian phản hồi',
-      dataIndex: 'thoiGianPhanHoi',
+    { 
+      title: 'Thời gian phản hồi', 
+      dataIndex: 'thoiGianPhanHoi', 
       valueType: 'date',
       sorter: (a, b) => {
-        const ta = a.thoiGianPhanHoi ? a.thoiGianPhanHoi.getTime() : 0;
-        const tb = b.thoiGianPhanHoi ? b.thoiGianPhanHoi.getTime() : 0;
+        const ta = a.thoiGianPhanHoi?.getTime() || 0;
+        const tb = b.thoiGianPhanHoi?.getTime() || 0;
         return ta - tb;
       },
-      render: (_, r) => (r.thoiGianPhanHoi ? r.thoiGianPhanHoi.toLocaleString() : '—'),
+      render: (_, record) => (record.thoiGianPhanHoi ? record.thoiGianPhanHoi.toLocaleString() : '—'),
     },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'trangThai',
+    { 
+      title: 'Trạng thái', 
+      dataIndex: 'trangThai', 
       valueType: 'select',
       valueEnum: {
         1: { text: 'Đang chờ xử lý', status: 'Default' },
@@ -224,82 +213,129 @@ const SupportPage: React.FC = () => {
         0: { text: 'Đã hủy', status: 'Error' },
       },
       render: (_, record) => {
-    let color = '';
-    let bgColor = '';
+        let color = '#595959';
+        let bgColor = '#fafafa';
 
-    switch (record.trangThai) {
-      case 1:
-        color = '#ad6800';     
-        bgColor = '#fffbe6';   
-        break;
-      case 2:
-        color = '#237804';     
-        bgColor = '#f6ffed';   
-        break;
-      case 0:
-        color = '#cf1322';   
-        bgColor = '#fff1f0';   
-        break;
-      default:
-        color = '#595959';
-        bgColor = '#fafafa';
-    }
+        switch (record.trangThai) {
+          case 1:
+            color = '#ad6800';
+            bgColor = '#fffbe6';
+            break;
+          case 2:
+            color = '#237804';
+            bgColor = '#f6ffed';
+            break;
+          case 0:
+            color = '#cf1322';
+            bgColor = '#fff1f0';
+            break;
+        }
+        const text =
+          record.trangThai === 1
+            ? 'Đang chờ xử lý'
+            : record.trangThai === 2
+            ? 'Đã xử lý xong'
+            : 'Đã hủy';
 
-    const text =
-      record.trangThai === 1
-        ? 'Đang chờ xử lý'
-        : record.trangThai === 2
-        ? 'Đã xử lý xong'
-        : 'Đã hủy';
-
-    return (
-      <span
-        style={{
-          padding: '4px 10px',
-          borderRadius: '6px',
-          fontWeight: 500,
-          backgroundColor: bgColor,
-          color,
-        }}
-      >
-        {text}
-      </span>
-    );
-  },
+        return (
+          <span
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontWeight: 500,
+              backgroundColor: bgColor,
+              color,
+            }}
+          >
+            {text}
+          </span>
+        );
+      },
     },
   ];
 
   return (
     <ConfigProvider locale={viVN}>
-      <ProTable<SupportItem>
-        headerTitle="Chăm Sóc Khách Hàng"
-        actionRef={actionRef}
-        rowKey="id"
-        columns={columns}
-        search={{ labelWidth: 'auto', resetText: 'Đặt lại', searchText: 'Tìm kiếm' }}
-        request={fetchSupports}
-        pagination={{ pageSize: 5 }}
-        toolBarRender={() => [
-          <Button key="reload" type="primary" onClick={() => actionRef.current?.reload()}>
-            Làm mới
-          </Button>,
-        ]}
-      />
+      <Card 
+        title="QUẢN LÝ CHĂM SÓC KHÁCH HÀNG" 
+        style={{ borderRadius: 12 }} 
+        bodyStyle={{ padding: 0 }}
+      >
+        {/* Phần tiêu đề tìm kiếm */}
+        <div style={{ padding: '24px 24px 0' }}>
+          <div
+            style={{
+              padding: '16px 24px',
+              background: '#fff',
+              border: '1px solid #f0f0f0',
+              borderRadius: '8px 8px 0 0',
+              borderBottom: 'none',
+            }}
+          >
+            <Text strong style={{ fontSize: '16px' }}>
+              TÌM KIẾM DỮ LIỆU
+            </Text>
+            <Divider style={{ margin: '12px 0 0' }} />
+          </div>
+        </div>
 
-      {/* Modal xử lý yêu cầu khách hàng */}
+        {/* Bảng dữ liệu */}
+        <div style={{ padding: '0 24px 24px' }}>
+          <ProTable<ChamSocKhachHang>
+            actionRef={actionRef}
+            headerTitle="DANH SÁCH YÊU CẦU"
+            columns={columns}
+            request={fetchSupports}
+            rowKey="id"
+            search={{
+              layout: 'vertical',
+              defaultCollapsed: false,
+              searchText: 'Tìm kiếm',
+              resetText: 'Đặt lại',
+              labelWidth: 'auto',
+              span: 4,
+            }}
+            form={{
+              style: {
+                background: '#ffffff',
+                padding: '0 24px 24px',
+                borderRadius: '0 0 8px 8px',
+                border: '1px solid #f0f0f0',
+                borderTop: 'none',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              },
+            }}
+            pagination={{ pageSize: 10, showSizeChanger: true }}
+            toolBarRender={() => [
+              <Button 
+                key="reload" 
+                type="primary" 
+                onClick={() => actionRef.current?.reload()}
+              >
+                Làm mới
+              </Button>,
+            ]}
+          />
+        </div>
+      </Card>
+
+      {/* Modal xử lý yêu cầu */}
       <Modal
         title="Xử lý yêu cầu khách hàng"
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => {
+          setModalVisible(false);
+          setEditingSupport(undefined);
+        }}
         footer={null}
         width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Nội dung phản hồi" name="phanHoi">
             <Input.TextArea
-              rows={4}
-              placeholder="Nhập phản hồi gửi đến người chơi..."
-              readOnly={editingSupport?.trangThai === 2} // chỉ đọc khi đã xử lý
+              rows={5}
+              placeholder="Nhập phản hồi gửi đến người dùng..."
+              readOnly={editingSupport?.trangThai === 2}
               style={{
                 color: '#000',
                 backgroundColor: editingSupport?.trangThai === 2 ? '#f5f5f5' : undefined,
@@ -312,7 +348,7 @@ const SupportPage: React.FC = () => {
             <Button
               type="primary"
               onClick={handleSubmit}
-              disabled={editingSupport?.trangThai === 2} // vô hiệu hóa nút gửi
+              disabled={editingSupport?.trangThai === 2 || editingSupport?.trangThai === 0}
             >
               Gửi phản hồi
             </Button>
