@@ -25,7 +25,7 @@ const InfoCard: React.FC<{
         lineHeight: '22px',
         padding: '16px 19px',
         minWidth: '240px',
-        flex: 1,
+        flex: '0 0 calc(33.333% - 11px)',
       }}
     >
       <div
@@ -127,23 +127,33 @@ const Welcome: React.FC = () => {
           >
             <InfoCard
               index={1}
-              title="Quản lý người dùng"
-              desc="Xem, tìm kiếm và quản lý thông tin người chơi trong hệ thống, bao gồm trạng thái tài khoản, lịch sử đăng nhập và hoạt động trong game."
+              title="Quản lý bài viết"
+              desc="Chỉnh sửa các bài viết từ được lấy dữ liệu từ trang web báo liên quan đến sức khỏe, dinh dưỡng, bài tập."
             />
             <InfoCard
               index={2}
-              title="Quản lý vùng tập chung"
-              desc="Tạo và chỉnh sửa các sự kiện trong game, quản lý hệ thống giftcode, giúp duy trì và phát triển nội dung trò chơi."
+              title="Quản lý người dùng"
+              desc="Tìm kiếm, theo dõi và quản lý toàn bộ thông tin tài khoản người dùng trong hệ thống."
             />
             <InfoCard
               index={3}
-              title="Quản lý kế hoạch"
-              desc="Theo dõi lịch sử nạp rút, doanh thu và các giao dịch trong hệ thống nhằm đảm bảo tính minh bạch và an toàn tài chính."
+              title="Quản lý vùng tập trung"
+              desc="Xây dựng và quản lý các nhóm bài tập được chia theo vùng  như ngực, tay, bụng, chân hoặc lưng."
             />
             <InfoCard
               index={4}
+              title="Quản lý thử thách"
+              desc="Tạo các thử thách luyện tập nhằm tăng động lực cho người dùng."
+            />
+            <InfoCard
+              index={5}
+              title="Quản lý kế hoạch"
+              desc="Hỗ trợ xây dựng kế hoạch 30 ngày với danh sách bài tập khoa học theo từng cấp độ nhằm phù hợp cho nhiều đối tượng."
+            />
+            <InfoCard
+              index={6}
               title="Chăm sóc khách hàng"
-              desc="Xử lý phản hồi và hỗ trợ người chơi nhanh chóng, đảm bảo trải nghiệm người dùng tốt nhất trong quá trình tham gia trò chơi."
+              desc="Tiếp nhận yêu cầu, đánh giá, đề xuất và xử lý phản hồi gửi đến người dùng."
             />
           </div>
         </div>

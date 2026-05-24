@@ -10,7 +10,7 @@ import {
   FileTextOutlined, TagsOutlined, ThunderboltOutlined, PlusOutlined, FireOutlined,
   CloseCircleOutlined, CheckCircleOutlined, CalendarOutlined, PlayCircleOutlined,
   SyncOutlined, ExclamationCircleOutlined, UploadOutlined, LinkOutlined, EditOutlined,
-  StarFilled, StarOutlined
+  StarFilled, StarOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import { collection, getDocs, doc, getDoc, deleteDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -19,8 +19,9 @@ import { db, storage } from '../../../config/firebaseConfig';
 const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-const TRIGGER_DONG_BO_BAI_VIET_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/triggerDongBoBaiViet';
+const TRIGGER_CAP_NHAT_BAI_VIET_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/triggerCapNhatBaiVietMoi';
 const TRIGGER_THEM_BAI_VIET_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/themBaiVietTuLink';
+const TRIGGER_XOA_BAI_VIET_CHUA_LUU_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/triggerXoaBaiVietChuaLuu';
 
 interface TuKhoa {
   TuKhoaUuTienCao: string[];
@@ -422,6 +423,7 @@ const BaiVietPage: React.FC = () => {
   const [loadingBaiViet, setLoadingBaiViet] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loadingCrawler, setLoadingCrawler] = useState(false);
+  const [loadingXoaChuaLuu, setLoadingXoaChuaLuu] = useState(false);
   const [themBaiVietVisible, setThemBaiVietVisible] = useState(false);
 
   const tongBaiViet = danhSachBaiViet.length;
@@ -539,7 +541,7 @@ const BaiVietPage: React.FC = () => {
         setLoadingCrawler(true);
         const startTime = Date.now();
         try {
-          const res = await fetch(TRIGGER_DONG_BO_BAI_VIET_URL, { method: 'GET' });
+          const res = await fetch(TRIGGER_CAP_NHAT_BAI_VIET_URL, { method: 'GET' });
           const data = await res.json();
           const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
           message.success(`Hoàn tất! Thêm ${data.count || 0} bài viết trong ${elapsed}s`);
@@ -548,6 +550,40 @@ const BaiVietPage: React.FC = () => {
           message.error(`Lỗi chạy crawler: ${e.message}`);
         } finally {
           setLoadingCrawler(false);
+        }
+      },
+    });
+  };
+
+  // ── MỚI: Xóa tất cả bài viết chưa lưu (trangThai !== 1) ──
+  const handleXoaBaiVietChuaLuu = () => {
+    const soBaiChuaLuu = danhSachBaiViet.filter(b => b.trangThai !== 1).length;
+    Modal.confirm({
+      title: 'Xóa tất cả bài viết chưa lưu',
+      icon: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Hành động này sẽ xóa <Text strong style={{ color: '#ff4d4f' }}>{soBaiChuaLuu} bài viết</Text> chưa được đánh dấu lưu vĩnh viễn.</p>
+          <p style={{ color: '#8c8c8c', fontSize: 13 }}>
+            Các bài viết được đánh dấu ⭐ sẽ <Text strong>không bị xóa</Text>.
+          </p>
+        </div>
+      ),
+      okText: 'Xóa ngay',
+      okButtonProps: { danger: true },
+      cancelText: 'Hủy',
+      onOk: async () => {
+        setLoadingXoaChuaLuu(true);
+        try {
+          const res = await fetch(TRIGGER_XOA_BAI_VIET_CHUA_LUU_URL, { method: 'GET' });
+          const data = await res.json();
+          if (!res.ok || !data.success) throw new Error(data.reason || 'Lỗi không xác định');
+          message.success(data.message || `Đã xóa các bài viết chưa lưu!`);
+          actionRef.current?.reload();
+        } catch (e: any) {
+          message.error(`Lỗi: ${e.message}`);
+        } finally {
+          setLoadingXoaChuaLuu(false);
         }
       },
     });
@@ -594,6 +630,9 @@ const BaiVietPage: React.FC = () => {
           if (!i.ngayDang) return false;
           return i.ngayDang.substring(0, 10) === params.ngayDang;
         });
+      }
+      if (params?.trangThai !== undefined && params.trangThai !== '') {
+        data = data.filter(i => i.trangThai === parseInt(params.trangThai));
       }
 
       if (sort?.ngayDang) {
@@ -682,6 +721,12 @@ const BaiVietPage: React.FC = () => {
       render: (_, record) => (
         <SourceDisplay linkLogo={record.linkLogo} source={record.linkBaiViet} nguon={record.nguon} />
       ),
+    },
+    { title: 'Trạng thái', dataIndex: 'trangThai', valueType: 'select', hideInTable: true,
+      valueEnum: {
+        1: { text: '⭐ Lưu vĩnh viễn', status: 'success' },
+        0: { text: '🗑️ Tự xóa sau 7 ngày', status: 'default' },
+      },
     },
     { title: 'Tùy chọn', valueType: 'option', width: 80,
       render: (_, record) => [
@@ -837,6 +882,7 @@ const BaiVietPage: React.FC = () => {
                       </Space>
                     </div>
                   </div>
+                  {/* Nút cập nhật bài viết mới */}
                   <Button
                     type="primary"
                     icon={loadingCrawler ? <SyncOutlined spin /> : <PlayCircleOutlined />}
@@ -846,6 +892,18 @@ const BaiVietPage: React.FC = () => {
                   >
                     {loadingCrawler ? 'Đang chạy...' : 'Cập nhật bài viết mới'}
                   </Button>
+                  {/* ── MỚI: Nút xóa bài viết chưa lưu ── */}
+                  <Tooltip title="Xóa tất cả bài viết chưa được đánh dấu ⭐ lưu vĩnh viễn">
+                    <Button
+                      danger
+                      icon={loadingXoaChuaLuu ? <SyncOutlined spin /> : <DeleteOutlined />}
+                      loading={loadingXoaChuaLuu}
+                      onClick={handleXoaBaiVietChuaLuu}
+                      block
+                    >
+                      {loadingXoaChuaLuu ? 'Đang xóa...' : `Xóa bài chưa lưu (${danhSachBaiViet.filter(b => b.trangThai !== 1).length})`}
+                    </Button>
+                  </Tooltip>
                 </Space>
               </Card>
             </Col>
@@ -920,7 +978,6 @@ const BaiVietPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Styles cho row được đánh dấu */}
       <style>{`
         .ant-table-row.row-pinned > td {
           background: #fffbe6 !important;
