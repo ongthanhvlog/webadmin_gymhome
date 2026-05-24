@@ -14,11 +14,9 @@ interface NguoiDung {
   ThongTinNguoiDung: {
     CanNang: number;
     ChieuCao: number;
-    GioiTinh: string;
     SoBaiTapHoanThanh: number;
     ThoiGianTapLuyen: number;
     TongCalo: number;
-    Tuoi: number;
   };
 }
 
@@ -50,11 +48,9 @@ const NguoiDungPage: React.FC = () => {
           ThongTinNguoiDung: {
             CanNang: Number(thongTin.CanNang || 0),
             ChieuCao: Number(thongTin.ChieuCao || 0),
-            GioiTinh: thongTin.GioiTinh || '',
             SoBaiTapHoanThanh: Number(thongTin.SoBaiTapHoanThanh || 0),
             ThoiGianTapLuyen: Number(thongTin.ThoiGianTapLuyen || 0),
             TongCalo: Number(thongTin.TongCalo || 0),
-            Tuoi: Number(thongTin.Tuoi || 0),
           },
         };
       });
@@ -138,18 +134,6 @@ const NguoiDungPage: React.FC = () => {
 
             <Col span={12}>
               <Form.Item label="Chiều cao (cm)" name={['ThongTinNguoiDung', 'ChieuCao']}>
-                <Input disabled style={{ color: 'rgba(0, 0, 0, 0.88)', backgroundColor: '#ffffff' }} />
-              </Form.Item>
-            </Col>
-
-            <Col span={12}>
-              <Form.Item label="Giới tính" name={['ThongTinNguoiDung', 'GioiTinh']}>
-                <Input disabled style={{ color: 'rgba(0, 0, 0, 0.88)', backgroundColor: '#ffffff' }} />
-              </Form.Item>
-            </Col>
-
-            <Col span={12}>
-              <Form.Item label="Tuổi" name={['ThongTinNguoiDung', 'Tuoi']}>
                 <Input disabled style={{ color: 'rgba(0, 0, 0, 0.88)', backgroundColor: '#ffffff' }} />
               </Form.Item>
             </Col>
