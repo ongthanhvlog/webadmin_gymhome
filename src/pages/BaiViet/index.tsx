@@ -19,9 +19,9 @@ import { db, storage } from '../../../config/firebaseConfig';
 const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-const TRIGGER_CAP_NHAT_BAI_VIET_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/triggerCapNhatBaiVietMoi';
-const TRIGGER_THEM_BAI_VIET_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/themBaiVietTuLink';
-const TRIGGER_XOA_BAI_VIET_CHUA_LUU_URL = 'https://us-central1-gymhome-4953.cloudfunctions.net/triggerXoaBaiVietChuaLuu';
+const TRIGGER_CAP_NHAT_BAI_VIET_URL = 'https://triggercapnhatbaivietmoi-6lydh5sipq-uc.a.run.app';
+const TRIGGER_THEM_BAI_VIET_URL = 'https://thembaiviettulink-6lydh5sipq-uc.a.run.app'; 
+const TRIGGER_XOA_BAI_VIET_CHUA_LUU_URL = 'https://triggerxoabaivietchualuu-6lydh5sipq-uc.a.run.app';
 
 interface TuKhoa {
   TuKhoaUuTienCao: string[];
