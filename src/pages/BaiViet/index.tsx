@@ -626,10 +626,24 @@ const BaiVietPage: React.FC = () => {
         data = data.filter(i => i.tag === params.tag);
       }
       if (params?.ngayDang) {
-        data = data.filter(i => {
-          if (!i.ngayDang) return false;
-          return i.ngayDang.substring(0, 10) === params.ngayDang;
-        });
+        let selectedDate = '';
+        if (params.ngayDang?.format) {
+          selectedDate = params.ngayDang.format('YYYY-MM-DD');
+        } else if (typeof params.ngayDang === 'string') {
+          if (params.ngayDang.includes('/')) {
+            const [d, m, y] = params.ngayDang.split('/');
+            selectedDate = `${y}-${m}-${d}`;
+          } else {
+            selectedDate = params.ngayDang;
+          }
+        }
+        
+        if (selectedDate) {
+          data = data.filter(i => {
+            if (!i.ngayDang) return false;
+            return i.ngayDang.substring(0, 10) === selectedDate;
+          });
+        }
       }
       if (params?.trangThai !== undefined && params.trangThai !== '') {
         data = data.filter(i => i.trangThai === parseInt(params.trangThai));
